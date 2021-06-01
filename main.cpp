@@ -10,8 +10,8 @@
 
 /*
 +1) Юзер вводит количество треугольников.
--2) Создаются новые объекты класса? структуры? списка? С полями — вершинами.
--3) Рандомятся координаты вершин (метод в конструкторе).
++2) Создаются новые объекты класса? структуры? списка? С полями — вершинами.
++3) Рандомятся координаты вершин (метод в конструкторе).
 -4) В файл эту байду, но понятно, чтобы потом можно было по номеру треугольник опознать. Табличкой? Как-то же можно было.
 -5) Предложить Юзеру что делать:
 -5.1) Распечатать то, что в файле:
@@ -27,33 +27,24 @@
 #include <cstdlib> // Содержит srand() и rand()
 #include <ctime> // Содержит time()
 
-#include <string> // 
-
-
 using namespace std;
-
-
 
 
 class triangle {
 public:
-
 	class apex {
 	public:
-		//apex(int apexName) {
-		apex() {
+		apex() { // Конструктор по умолчанию для класса apex
 			x = rand() % 11; // Задание значение для x в диапазоне от 0 до 10 включительно
 			y = rand() % 11; // Задание значение для y в диапазоне от 0 до 10 включительно
 		}
-			
 		int x;
 		int	y;
 	};
 
+	triangle() {} // Конструктор по умолчанию для класса triangle
 
-	//triangle(int i) {
-	triangle() {
-		//number = i;
+	void printApex() {
 		cout << "A: " << A.x << " " << A.y << endl;
 		cout << "B: " << B.x << " " << B.y << endl;
 		cout << "C: " << C.x << " " << C.y << endl;
@@ -62,11 +53,7 @@ public:
 	apex A;
 	apex B;
 	apex C;
-
-
-	//int number;		
 };
-
 
 
 int main()
@@ -85,27 +72,20 @@ int main()
 			cout << "\n>> ";
 			cin >> triAmt;
 		}
+		cout << endl;
 
-
-
-		triangle* array;
-
+		// Создание массива треугольников triArray
+		triangle* triArray = new triangle[triAmt];
 		srand(time(NULL)); // srand() получает в виде параметра текущее системное время, которое при каждом запускe программы будет разным
 		for (int i = 0; i < triAmt; i++) {
-			//
-			
-			//array[i] = triangle abc;
-			triangle abc;
-
-			//abc.number = i;
+			triArray[i] = triangle();
+			triArray[i].printApex();
+			//cout << endl << "triArray[" << i << "].A.x " << array[i].A.x << endl << endl;
 		}
 		
 
 
-
-		// Инициализация и вывод созданного массива на экран
-		//cout << endl;
-		//////////////////////////arrayInit(array, N, K);
+	
 
 		/*
 		// Запись исходного массива в файл
@@ -151,6 +131,8 @@ int main()
 		*/
 
 
+		// Освобождение памяти из-под массива triArray
+		delete[]triArray;
 
 		// Предложение пользователю повторно запустить программу или выйти
 		cout << "\n\nPlease choose from the following:\n\t1 - Run program again.\n\t2 - Exit.\n";
@@ -171,6 +153,3 @@ int main()
 	} while (endFlag); // Если флаг равен 0, то выход из цикла 
 	return 0;
 }
-
-
-
