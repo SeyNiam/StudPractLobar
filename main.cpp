@@ -12,9 +12,9 @@
 +1) Юзер вводит количество треугольников.
 +2) Создаются новые объекты класса? структуры? списка? С полями — вершинами.
 +3) Рандомятся координаты вершин (метод в конструкторе).
--4) В файл эту байду, но понятно, чтобы потом можно было по номеру треугольник опознать. Табличкой? Как-то же можно было.
++4) В файл эту байду, но понятно, чтобы потом можно было по номеру треугольник опознать. Табличкой? Как-то же можно было.
 -5) Предложить Юзеру что делать:
--5.1) Распечатать то, что в файле:
++5.1) Распечатать то, что в файле:
 	А (4.0 ; -7.8)
 	B (0.6 ; 5.1)
 	C (-3.0 ; -11.0).
@@ -29,6 +29,8 @@
 
 using namespace std;
 
+void fileOutput(string, int); // Прототип функции вывода из файла
+void calculate(); // Прототип функции вычисления площади и периметра треугольника по его номеру в файле
 
 class triangle {
 public:
@@ -39,22 +41,21 @@ public:
 			y = rand() % 11; // Задание значение для y в диапазоне от 0 до 10 включительно
 		}
 		int x;
-		int	y;
+		int y;
 	};
 
 	triangle() {} // Конструктор по умолчанию для класса triangle
 
 	void printApex() {
-		cout << "A: " << A.x << " " << A.y << endl;
-		cout << "B: " << B.x << " " << B.y << endl;
-		cout << "C: " << C.x << " " << C.y << endl;
+		cout << "A: (" << A.x << " ; " << A.y << ")" << endl;
+		cout << "B: (" << B.x << " ; " << B.y << ")" << endl;
+		cout << "C: (" << C.x << " ; " << C.y << ")" << endl;
 	}
 
 	apex A;
 	apex B;
 	apex C;
 };
-
 
 int main()
 {
@@ -63,6 +64,8 @@ int main()
 	do {
 		int triAmt; // Количество треугольников, определяемое пользователем
 		string path = "output.txt"; // Путь к файлу с выводом
+		int userChoise = 0; // Выбор пользователя по ходу программы
+		int exit = 0; // Флаг выхода из пользовательского выбора
 
 		// Запрос размеров массива у пользователя
 		cout << endl << "Please input the amount of triangles: ";
@@ -81,51 +84,58 @@ int main()
 		for (int i = 0; i < triAmt; i++) {
 			triArray[i] = triangle();
 			triArray[i].printApex();
-			//cout << endl << "triArray[" << i << "].A.x " << array[i].A.x << endl << endl;
+			cout << endl;
 		}
-		
 
-
-	
-
-		
 		// Запись вершин в файл
 		ofstream MyFile;
 		//MyFile.open(path, ios::trunc); // Открытие файла с удалением содержимого, если оно имелось
 		MyFile.open(path, ofstream::trunc); // Открытие файла с удалением содержимого, если оно имелось
 		if (MyFile.is_open()) {
 			for (int i = 0; i < triAmt; i++) {
-				//MyFile << triArray[i] << " \t";
-				//MyFile.write(reinterpret_cast<char*>(&triArray), sizeof(triArray));
-				//MyFile << "\t";
-
-
-				MyFile.write((char*)&triArray, sizeof(triangle));
-				//MyFile << "\t";
-
-
+				MyFile.write((char*)&triArray[i], sizeof(triangle));
 			}
-			//MyFile << endl << endl;
 		}
 		else {
 			cout << "Something went wrong.";
 		}
 		MyFile.close();
 		
+		
 
-		ifstream fin;
-		fin.open(path);
-		if (fin.is_open()) {
+		// Выбор пользователем желаемого действия: вывод на экран содержимого файла или вычисление площади и периметра одного из треугольников
+		cout << "\n\nPlease choose from the following:\n\t1 - Print the information from the file.\n\t2 - Calculate the area and perimeter of a triangle.\n\t3 - Exit.";
+		do {
+			cout << "\n>> ";
+			cin >> userChoise;
+			if (userChoise != 1 && userChoise != 2 && userChoise != 3) {
+				cout << "Invalid answer. Please try again.";
+				userChoise = 0;
+			}
+		} while (userChoise == 0);
+		cout << endl;
+
+		switch (userChoise)
+		{
+		case 1: 
+			fileOutput(path, triAmt); 
+			break;
+		case 2: 
+			calculate();
+		case 3: 
+			exit = 1;
+			break;
+		default:
+			cout << "Unexpected error.";
+			break;
+		}
 			
-			triangle tmp;
-			fin.read((char*)&tmp, sizeof(triangle));
-			tmp.printApex();
+		
+		//while(exit == 0)
+		
+		
 
-		}
-		else {
-			cout << "Something went wrong.";
-		}
-		fin.close();
+		
 
 		
 		/*
@@ -173,4 +183,36 @@ int main()
 
 	} while (endFlag); // Если флаг равен 0, то выход из цикла 
 	return 0;
+}
+
+// Функция вывода из файла
+void fileOutput(string path, int triAmt) {
+	ifstream fin;
+	fin.open(path);
+	if (fin.is_open()) {
+		triangle tmp;
+		for (int i = 0; i < triAmt && fin.read((char*)&tmp, sizeof(triangle)); i++) {
+			cout << "Triangle " << i << ":" << endl;
+			tmp.printApex();
+			cout << endl;
+		}
+	}
+	else {
+		cout << "Something went wrong.";
+	}
+	fin.close();
+}
+
+void calculate() {
+	int triNumber = 0;
+	// Выбор пользователем одного из треугольников
+	cout << "\n\nPlease enter the number of a triangle.\n";
+	do {
+		cout << "\n>> ";
+		cin >> triNumber;
+		if (triNumber != 1 && triNumber != 2 && triNumber != 3) {
+			cout << "Invalid answer. Please try again.";
+			triNumber = 0;
+		}
+	} while (triNumber == 0);
 }
