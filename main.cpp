@@ -1,4 +1,4 @@
-/* 
+/* Задание 14 вариант
 Создать файл, содержащий описание заданного количества треугольников. 
 Каждый элемент файла - запись с полями A, B, C, описывающими вершины треугольников. 
 Каждое из полей A, B, C в свою очередь запись, содержащая координаты X, Y вершины. 
@@ -8,29 +8,30 @@
 	- вычислить площадь и периметр треугольника по его номеру в файле.
 */
 
-/*
+/* Список для реализации +/- (алгоритм выполнения программы)
 +1) Юзер вводит количество треугольников.
 +2) Создаются новые объекты класса? структуры? списка? С полями — вершинами.
 +3) Рандомятся координаты вершин (метод в конструкторе).
 +4) В файл эту байду, но понятно, чтобы потом можно было по номеру треугольник опознать. Табличкой? Как-то же можно было.
--5) Предложить Юзеру что делать:
++5) Предложить Юзеру что делать:
 +5.1) Распечатать то, что в файле:
 	А (4.0 ; -7.8)
 	B (0.6 ; 5.1)
 	C (-3.0 ; -11.0).
--5.2.1) Юзер вводит номер треугольника.
--5.2.1) Вычисляются и выводятся его площадь и периметр.
++5.2.1) Юзер вводит номер треугольника.
++5.2.1) Вычисляются и выводятся его площадь и периметр.
 */
 
 #include <iostream>
 #include <fstream> // Общий файловый поток с возможностями как ofstream, так и ifstream, которые позволяют ему создавать, читать и записывать информацию в файлы
 #include <cstdlib> // Содержит srand() и rand()
 #include <ctime> // Содержит time()
+#include <math.h> // Содержит sqrt() и pow()
 
 using namespace std;
 
 void fileOutput(string, int); // Прототип функции вывода из файла
-void calculate(); // Прототип функции вычисления площади и периметра треугольника по его номеру в файле
+int triSelect(int); // Прототип функции выбора треугольника
 
 class triangle {
 public:
@@ -52,6 +53,35 @@ public:
 		cout << "C: (" << C.x << " ; " << C.y << ")" << endl;
 	}
 
+	float area() {
+		float S = 0.5 * ((B.x-A.x) * (C.y-A.y) - (C.x-A.x) * (B.y-A.y));
+		if (S < 0) {
+			S *= -1;
+		}
+		return S;
+	}
+
+	int perimeter() {
+		float P;
+		float AB = sqrt(pow((B.x-A.x), 2) + pow((B.y-A.y), 2));
+		float BC = sqrt(pow((C.x-B.x), 2) + pow((C.y-B.y), 2));
+		float AC = sqrt(pow((C.x-A.x), 2) + pow((C.y-A.y), 2));
+
+		if (AB < 0) {
+			AB *= -1;
+		}
+		if (BC < 0) {
+			BC *= -1;
+		}
+		if (AC < 0) {
+			AC *= -1;
+		}
+
+		P = AB + BC + AC;
+
+		return P;
+	}
+
 	apex A;
 	apex B;
 	apex C;
@@ -59,52 +89,46 @@ public:
 
 int main()
 {
-	int endFlag = 1; // Флаг, который останавливает приложение
-	// Глобальный цикл, который предотвращает завершение программы без желания пользователя
-	do {
-		int triAmt; // Количество треугольников, определяемое пользователем
-		string path = "output.txt"; // Путь к файлу с выводом
-		int userChoise = 0; // Выбор пользователя по ходу программы
-		int exit = 0; // Флаг выхода из пользовательского выбора
+	int triAmt; // Количество треугольников, определяемое пользователем
+	string path = "output.txt"; // Путь к файлу с выводом
+	int userChoise = 0; // Выбор пользователя по ходу программы
+	int exit = 0; // Флаг выхода из пользовательского выбора
+	int triChoise = -1; // Номер выбранного для вычислений треугольника
 
-		// Запрос размеров массива у пользователя
-		cout << endl << "Please input the amount of triangles: ";
+	// Запрос размеров массива у пользователя
+	cout << endl << "Please input the amount of triangles: ";
+	cout << "\n>> ";
+	cin >> triAmt;
+	while (triAmt <= 0) {
+		cout << "Please enter positive values: ";
 		cout << "\n>> ";
 		cin >> triAmt;
-		while (triAmt <= 0) {
-			cout << "Please enter positive values: ";
-			cout << "\n>> ";
-			cin >> triAmt;
-		}
-		cout << endl;
+	}
+	cout << endl;
 
-		// Создание массива треугольников triArray
-		triangle* triArray = new triangle[triAmt];
-		srand(time(NULL)); // srand() получает в виде параметра текущее системное время, которое при каждом запускe программы будет разным
+	// Создание массива треугольников triArray
+	triangle* triArray = new triangle[triAmt];
+	srand(time(NULL)); // srand() получает в виде параметра текущее системное время, которое при каждом запускe программы будет разным
+	for (int i = 0; i < triAmt; i++) {
+		triArray[i] = triangle();
+	}
+
+	// Запись вершин в файл
+	ofstream MyFile;
+	MyFile.open(path, ofstream::trunc); // Открытие файла с удалением содержимого, если оно имелось
+	if (MyFile.is_open()) {
 		for (int i = 0; i < triAmt; i++) {
-			triArray[i] = triangle();
-			triArray[i].printApex();
-			cout << endl;
+			MyFile.write((char*)&triArray[i], sizeof(triangle));
 		}
+	}
+	else {
+		cout << "Something went wrong.";
+	}
+	MyFile.close();
 
-		// Запись вершин в файл
-		ofstream MyFile;
-		//MyFile.open(path, ios::trunc); // Открытие файла с удалением содержимого, если оно имелось
-		MyFile.open(path, ofstream::trunc); // Открытие файла с удалением содержимого, если оно имелось
-		if (MyFile.is_open()) {
-			for (int i = 0; i < triAmt; i++) {
-				MyFile.write((char*)&triArray[i], sizeof(triangle));
-			}
-		}
-		else {
-			cout << "Something went wrong.";
-		}
-		MyFile.close();
-		
-		
-
-		// Выбор пользователем желаемого действия: вывод на экран содержимого файла или вычисление площади и периметра одного из треугольников
-		cout << "\n\nPlease choose from the following:\n\t1 - Print the information from the file.\n\t2 - Calculate the area and perimeter of a triangle.\n\t3 - Exit.";
+	// Выбор пользователем желаемого действия: вывод на экран содержимого файла или вычисление площади и периметра одного из треугольников
+	do {
+		cout << "\nPlease choose from the following:\n\t1 - Print the information from the file.\n\t2 - Calculate the area and perimeter of a triangle.\n\t3 - Exit.";
 		do {
 			cout << "\n>> ";
 			cin >> userChoise;
@@ -113,75 +137,29 @@ int main()
 				userChoise = 0;
 			}
 		} while (userChoise == 0);
-		cout << endl;
 
 		switch (userChoise)
 		{
-		case 1: 
-			fileOutput(path, triAmt); 
+		case 1:
+			fileOutput(path, triAmt); // Вызов функции вывода из файла
 			break;
-		case 2: 
-			calculate();
-		case 3: 
+		case 2:
+			triChoise = triSelect(triAmt); // Вызов функции выбора треугольника
+			cout << "Area: " << triArray[triChoise].area() << endl; // Нахождение площади выбранного треугольника
+			cout << "Perimeter: " << triArray[triChoise].perimeter() << endl; // Нахождение периметра выбранного треугольника
+		case 3:
 			exit = 1;
 			break;
 		default:
-			cout << "Unexpected error.";
+			cout << "Unexpected error." << endl;
+			exit = 1;
 			break;
 		}
-			
-		
-		//while(exit == 0)
-		
-		
+	} while (exit == 0); // Если флаг не равен 0, то выход из цикла 
 
-		
+	// Освобождение памяти из-под массива triArray
+	delete[]triArray;
 
-		
-		/*
-		// Вывод максимального элемента в каждой диагонали, параллельной главной, на экран и запись в файл
-		if (N != 1 && K != 1) {
-			cout << endl;
-			MyFile.open("test.txt", std::ios::app); // std::ios::app - это значение "добавления" в открытом режиме. Новые данные будут записаны в конец файла
-			if (MyFile.is_open()) {
-				for (int k = 1; k < DIO; k++) {
-					cout << k << ": " << max[k] << "\n";
-					MyFile << k << ": " << max[k] << "\n";
-				}
-				MyFile << endl << endl;
-			}
-			else {
-				cout << "Something went wrong";
-			}
-			MyFile.close();
-		}
-		else { // Если массив состоит только из одного элемента, то нет никаких диагоналей, кроме гравной
-			cout << endl << "There are no diagonals parallel to the main.";
-		}
-
-		*/
-
-
-		// Освобождение памяти из-под массива triArray
-		delete[]triArray;
-
-		// Предложение пользователю повторно запустить программу или выйти
-		cout << "\n\nPlease choose from the following:\n\t1 - Run program again.\n\t2 - Exit.\n";
-		do {
-			cout << "\n>> ";
-			cin >> endFlag;
-			if (endFlag != 1 && endFlag != 2) {
-				cout << "Incorrect answer. Please try again.";
-				endFlag = 0;
-			}
-		} while (endFlag == 0);
-		switch (endFlag) {
-		case 1: endFlag = 1; break;
-		case 2: endFlag = 0; break;
-		default: cout << "Incorrect answer. The program will be closed."; endFlag = 0; break;
-		}
-
-	} while (endFlag); // Если флаг равен 0, то выход из цикла 
 	return 0;
 }
 
@@ -203,16 +181,18 @@ void fileOutput(string path, int triAmt) {
 	fin.close();
 }
 
-void calculate() {
+// Функция выбора треугольника
+int triSelect(int triAmt) {
 	int triNumber = 0;
 	// Выбор пользователем одного из треугольников
-	cout << "\n\nPlease enter the number of a triangle.\n";
+	cout << "\nPlease enter the number of a triangle.\n";
 	do {
 		cout << "\n>> ";
 		cin >> triNumber;
-		if (triNumber != 1 && triNumber != 2 && triNumber != 3) {
+		if (triNumber >= triAmt || triNumber < 0) {
 			cout << "Invalid answer. Please try again.";
-			triNumber = 0;
+			triNumber = -1;
 		}
-	} while (triNumber == 0);
+	} while (triNumber == -1);
+	return triNumber;
 }
