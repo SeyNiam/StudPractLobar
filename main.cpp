@@ -62,6 +62,7 @@ int main()
 	// Глобальный цикл, который предотвращает завершение программы без желания пользователя
 	do {
 		int triAmt; // Количество треугольников, определяемое пользователем
+		string path = "output.txt"; // Путь к файлу с выводом
 
 		// Запрос размеров массива у пользователя
 		cout << endl << "Please input the amount of triangles: ";
@@ -87,27 +88,47 @@ int main()
 
 	
 
-		/*
-		// Запись исходного массива в файл
+		
+		// Запись вершин в файл
 		ofstream MyFile;
-		MyFile.open("test.txt", ios::trunc); // Открытие файла с удалением содержимого, если оно имелось
+		//MyFile.open(path, ios::trunc); // Открытие файла с удалением содержимого, если оно имелось
+		MyFile.open(path, ofstream::trunc); // Открытие файла с удалением содержимого, если оно имелось
 		if (MyFile.is_open()) {
-			for (int i = 0; i < N; i++) {
-				for (int j = 0; j < K; j++) {
-					MyFile << array[i][j] << " \t";
-				}
-				MyFile << endl;
+			for (int i = 0; i < triAmt; i++) {
+				//MyFile << triArray[i] << " \t";
+				//MyFile.write(reinterpret_cast<char*>(&triArray), sizeof(triArray));
+				//MyFile << "\t";
+
+
+				MyFile.write((char*)&triArray, sizeof(triangle));
+				//MyFile << "\t";
+
+
 			}
-			MyFile << endl << endl;
+			//MyFile << endl << endl;
 		}
 		else {
-			cout << "Something went wrong";
+			cout << "Something went wrong.";
 		}
 		MyFile.close();
-
-
 		
 
+		ifstream fin;
+		fin.open(path);
+		if (fin.is_open()) {
+			
+			triangle tmp;
+			fin.read((char*)&tmp, sizeof(triangle));
+			tmp.printApex();
+
+		}
+		else {
+			cout << "Something went wrong.";
+		}
+		fin.close();
+
+		
+		/*
 		// Вывод максимального элемента в каждой диагонали, параллельной главной, на экран и запись в файл
 		if (N != 1 && K != 1) {
 			cout << endl;
